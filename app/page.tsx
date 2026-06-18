@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Heart, ShieldCheck, Trophy, Sparkles, BookOpen, ArrowRight } from 'lucide-react';
+import { Heart, ShieldCheck, Trophy, Sparkles, BookOpen, ArrowRight, Flame } from 'lucide-react';
 import NedarimFrame from '@/components/NedarimFrame';
 
 interface Donor {
@@ -25,11 +25,26 @@ export default function DonationLandingPage() {
 
   const presetAmounts = [
     { amount: 500, title: 'מקים ישיבה על קברו', subtitle: 'לחודש' },
-    { amount: 300, title: 'מייסד', subtitle: 'לחודש' },
+    { amount: 300, title: 'החזקת אברך', subtitle: 'לחודש' },
     { amount: 180, title: 'בונה', subtitle: 'לחודש' },
     { amount: 100, title: 'לוקח חלק', subtitle: 'לחודש' },
     { amount: 50, title: 'שותף', subtitle: 'לחודש' }
   ];
+
+  // יעד הקמפיין בשקלים
+const GOAL_AMOUNT = 60000;
+
+// חישוב הסכום הכולל שנאסף
+const totalDonated = donors.reduce((sum, donor) => sum + donor.amount, 0);
+
+// הוספה של הסכום ההתחלתי (40,000 ש"ח כבקשתך)
+const totalWithStartingAmount = totalDonated + 39000;
+
+// חישוב אחוז ההתקדמות (מוגבל ל-100% אם עוברים את היעד)
+const progressPercentage = Math.min(
+  (totalWithStartingAmount / GOAL_AMOUNT) * 100,
+  100
+);
 
   const currentAmount = customAmount ? Number(customAmount) : amount || 0;
 
@@ -86,49 +101,57 @@ export default function DonationLandingPage() {
   return (
     <div className="min-h-screen bg-brand-bg text-slate-100 font-sans antialiased relative overflow-x-hidden" dir="rtl">
       
-      {/* כפתור צף למעלה כל הזמן */}
-      <div className="fixed top-6 left-6 z-50">
-        <button 
-          onClick={scrollToDonation}
-          className="bg-gradient-to-r from-gold-light via-gold-base to-gold-dark hover:scale-105 text-[#060a13] font-black py-3 px-6 rounded-full shadow-[0_0_20px_rgba(223,183,108,0.4)] transition-all flex items-center gap-2 border border-gold-light/50 cursor-pointer"
-        >
-          <Heart className="w-5 h-5 fill-[#060a13]" /> אני רוצה לקחת חלק
-        </button>
-      </div>
+      {/* כפתור צף למעלה כל הזמן - מוזז מעט למטה ונמצא מעל כל התוכן */}
+<div className="fixed top-19 left-6 z-[60]">
+  <button 
+    onClick={scrollToDonation}
+    className="bg-gradient-to-r from-gold-light via-gold-base to-gold-dark hover:scale-105 text-[#060a13] font-black py-3 px-6 rounded-full shadow-[0_0_20px_rgba(223,183,108,0.4)] transition-all flex items-center gap-2 border border-gold-light/50 cursor-pointer"
+  >
+    <Heart className="w-5 h-5 fill-[#060a13]" /> אני רוצה לקחת חלק
+  </button>
+</div>
 
-      {/* 1. רצועת תורמים רצה בלייב */}
-      <div className="bg-navy-card/80 backdrop-blur-md border-b border-gold-base/20 py-3.5 overflow-hidden shadow-lg relative z-20">
-        <div className="max-w-7xl mx-auto px-4 flex items-center gap-4">
-          <span className="bg-gold-base/10 border border-gold-base/30 text-gold-light text-xs font-bold px-2.5 py-1 rounded-md animate-pulse flex items-center gap-1 shrink-0">
-            <Sparkles className="w-3.5 h-3.5 text-gold-light" /> השותפים
-          </span>
-          <div className="w-full overflow-hidden relative h-6">
-            <div className="flex gap-12 animate-marquee whitespace-nowrap absolute">
-              {donors.length > 0 ? (
-                donors.map((donor) => (
-                  <span key={donor._id} className="inline-flex items-center gap-2 font-medium text-sm text-slate-300">
-                    <Heart className="w-4 h-4 text-gold-base fill-gold-base/20" />
-                    <span className="font-bold text-gold-light">{donor.name}</span>
-                    {donor.dedication && <span className="text-slate-400 mx-1">({donor.dedication})</span>}
-                    תרם/ה לקופת הכולל{' '}
-                    <span className="text-gold-base font-bold bg-gold-base/5 border border-gold-base/10 px-2 py-0.5 rounded text-xs">{donor.amount} ₪</span>
-                  </span>
-                ))
-              ) : (
-                <span className="text-sm text-slate-400">ממתין לשותפים הראשונים... אשרי חלקכם בהחזקת התורה!</span>
+      {/* 1. רצועת תורמים רצה בלייב - מקובעת לראש המסך (Fixed) */}
+{/* 1. רצועת תורמים רצה בלייב - מקובעת לראש המסך (Fixed) */}
+<div className="fixed top-0 left-0 right-0 bg-navy-card/90 backdrop-blur-md border-b border-gold-base/20 py-3.5 overflow-hidden shadow-lg z-50">
+  <div className="max-w-7xl mx-auto px-4 flex items-center gap-4">
+    <span className="bg-gold-base/10 border border-gold-base/30 text-gold-light text-xs font-bold px-2.5 py-1 rounded-md animate-pulse flex items-center gap-1 shrink-0 z-10">
+      <Sparkles className="w-3.5 h-3.5 text-gold-light" /> השותפים
+    </span>
+    
+    <div className="w-full overflow-hidden relative h-6 flex items-center">
+      {donors.length > 0 ? (
+        <div className="flex gap-12 whitespace-nowrap animate-marquee min-w-full shrink-0">
+          {[...donors, ...donors, ...donors].map((donor, index) => (
+            <span key={`${donor._id || index}-${index}`} className="inline-flex items-center gap-2 font-medium text-sm text-slate-300">
+              <Heart className="w-4 h-4 text-gold-base fill-gold-base/20" />
+              <span className="font-bold text-gold-light">{donor.name}</span>
+              
+              {/* הצגת ההקדשה ברצועה למעלה */}
+              {donor.dedication && (
+                <span className="text-gold-base/80 text-xs bg-gold-base/5 px-1.5 py-0.5 rounded border border-gold-base/10 mx-1">
+                  {donor.dedication}
+                </span>
               )}
-            </div>
-          </div>
+              
+              תרם/ה לקופת הכולל{' '}
+              <span className="text-gold-base font-bold bg-gold-base/5 border border-gold-base/10 px-2 py-0.5 rounded text-xs">
+                {donor.amount} ₪ לחודש
+              </span>
+            </span>
+          ))}
         </div>
-      </div>
+      ) : (
+        <span className="text-sm text-slate-400 animate-fade-in">ממתין לשותפים הראשונים... אשרי חלקכם בהחזקת התורה!</span>
+      )}
+    </div>
+  </div>
+</div>
 
       <main className="relative z-10">
-        {/* אזור ההירו - תמונת רקע מובנית של לומדים, כותרות יוקרתיות ותמונת רב מוגדלת */}
-        {/* אזור ההירו - פרוס על כל רוחב המסך מקצה לקצה (Full Bleed Background) */}
 {/* אזור ההירו - פרוס על כל רוחב המסך מקצה לקצה (Full Bleed Background) עם תאורה מוגברת */}
 <section className="w-full relative overflow-hidden min-h-[700px] border-b border-gold-base/10 bg-brand-bg">
   
-  {/* ----------------- שכבות תאורה ואור (Lighting Effects) ----------------- */}
   {/* אפקט אור עליון מרכזי ששוטף את ה-Hero */}
   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-gradient-to-b from-gold-base/10 via-gold-base/5 to-transparent blur-[100px] pointer-events-none z-10" />
   
@@ -196,12 +219,8 @@ export default function DonationLandingPage() {
         
         {/* הילת אור אחורית רכה ועוצמתית יותר בצבעי זהב להבלטת הדמות */}
         <div className="absolute inset-0 bg-gradient-to-tr from-gold-dark/20 via-gold-base/30 to-transparent blur-[140px] rounded-full pointer-events-none scale-125 opacity-40 animate-pulse" />
-        
-        {/* קו דקורטיבי היקפי עדין מאחורי הדמות */}
-        {/* <div className="absolute inset-2 border border-gold-base/15 rounded-[3rem] pointer-events-none -z-10 transform rotate-1 hidden md:block" /> */}
-
         <img 
-          src="/רקע שקוף.png" 
+          src="/רקע שקוף.webp" 
           alt="רבי יצחק אייזיק" 
           className="w-full h-auto object-contain drop-shadow-[0_25px_70px_rgba(0,0,0,0.85)] relative z-10 select-none max-h-[700px] md:max-h-[800px] transform hover:scale-[1.01] transition-transform duration-500 ease-out" 
         />
@@ -210,6 +229,64 @@ export default function DonationLandingPage() {
 
   </div>
 </section>
+
+{/* ----------------- פס התקדמות יעד הקמפיין ----------------- */}
+<div className="bg-navy-card/60 backdrop-blur-sm rounded-3xl shadow-xl border border-gold-base/20 p-8 md:p-10 mb-10 animate-fade-in relative">
+  {/* אפקט הילה פנימית קלה לאור */}
+  <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-gold-light/20 to-transparent" />
+  
+  <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8 border-b border-slate-800/80 pb-6">
+    <div className="flex items-center gap-4 text-right">
+      <Flame className="w-10 h-10 text-gold-light flex-shrink-0" />
+      <div>
+        <h3 className="text-3xl font-black text-slate-100 mb-1 leading-tight">יעד הקמת הכולל</h3>
+        <p className="text-gold-base text-lg font-medium">יחד בני המשפחה נגיע ליעד ע"י תרומה חודשית קבועה</p>
+      </div>
+    </div>
+    
+    {/* תצוגת הסכומים */}
+    <div className="text-center md:text-left flex flex-col items-center md:items-start gap-1 p-4 bg-brand-bg rounded-2xl border border-slate-800/60 shadow-inner">
+      <div className="text-slate-400 text-sm font-medium tracking-wide">נאספו עד כה:</div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-gold-light via-gold-base to-gold-dark drop-shadow-[0_2px_10px_rgba(223,183,108,0.3)]">
+          ₪{totalWithStartingAmount.toLocaleString()}
+        </span>
+        <span className="text-slate-500 text-xl font-bold">
+          / ₪{GOAL_AMOUNT.toLocaleString()}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {/* פס ההתקדמות הויזואלי */}
+  <div className="relative w-full h-8 bg-brand-bg rounded-full border-2 border-slate-800 shadow-inner overflow-hidden group">
+    {/* שכבת אור אחורית פועמת על הפס */}
+    <div className="absolute inset-y-0 right-0 h-full bg-gold-base/10 blur-[10px] pointer-events-none transition-all duration-1000 ease-out" style={{ width: `${progressPercentage}%` }} />
+    
+    {/* פס המילוי המדורג */}
+    <div 
+      className="absolute inset-y-0 right-0 h-full rounded-full bg-gradient-to-r from-gold-dark via-gold-base to-gold-light transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(223,183,108,0.5)] flex items-center justify-end px-3"
+      style={{ width: `${progressPercentage}%` }}
+    >
+      {/* תצוגת האחוזים בתוך הפס (מוצג רק כשיש מספיק מקום) */}
+      {progressPercentage > 15 && (
+        <span className="text-[#060a13] font-black text-sm drop-shadow-md animate-fade-in delay-300">
+          {totalWithStartingAmount >= GOAL_AMOUNT ? "היעד הושלם!" : `${progressPercentage.toFixed(0)}%`}
+        </span>
+      )}
+    </div>
+  </div>
+
+  {/* טקסט השלמה אם עברנו את היעד */}
+  {totalWithStartingAmount >= GOAL_AMOUNT && (
+    <div className="mt-6 p-4 bg-gold-base/5 border border-gold-base/20 rounded-2xl text-center animate-fade-in relative overflow-hidden">
+      <Sparkles className="w-5 h-5 text-gold-light absolute -top-1 -right-1" />
+      <p className="text-gold-light font-bold text-xl relative z-10">
+        אשריכם! עברנו את היעד, הכולל מוקם ברוב פאר. כל תרומה נוספת מחזקת את לומדי התורה!
+      </p>
+    </div>
+  )}
+</div>
 
         {/* טקסט השראה */}
         <div className="max-w-4xl mx-auto px-4 py-12 text-center">
@@ -228,64 +305,89 @@ export default function DonationLandingPage() {
         </div>
 
         {/* אזור התרומה הדינאמי - חצוי ל-2 שלבים */}
-        <div id="donation-section" className="max-w-5xl mx-auto px-4 pb-16">
-          <div className="bg-navy-card/90 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-gold-base/20 p-8 md:p-12">
-            
-            {step === 1 ? (
-              <div className="space-y-8 animate-fade-in">
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl md:text-3xl font-bold text-slate-100 mb-2">בחרו את שותפות הקודש שלכם</h3>
-                  <p className="text-gold-base">כל סכום מקרב אותנו ליעד ומחזיק את לומדי התורה</p>
-                </div>
+        {/* אזור התרומה הדינאמי - חצוי ל-2 שלבים */}
+<div id="donation-section" className="max-w-5xl mx-auto px-4 pb-16">
+  <div className="bg-navy-card/90 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-gold-base/20 p-8 md:p-12">
+    
+    {step === 1 ? (
+      <div className="space-y-8 animate-fade-in">
+        <div className="text-center mb-8">
+          <h3 className="text-2xl md:text-3xl font-bold text-slate-100 mb-2">בחרו את שותפות הקודש שלכם</h3>
+          <p className="text-gold-base">כל סכום מקרב אותנו ליעד ומחזיק את לומדי התורה</p>
+        </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  {presetAmounts.map((preset) => (
-                    <button
-                      key={preset.amount}
-                      type="button"
-                      onClick={() => {
-                        setAmount(preset.amount);
-                        setCustomAmount('');
-                      }}
-                      className={`flex flex-col items-center justify-center py-6 px-4 rounded-2xl border-2 transition-all duration-300 ${
-                        amount === preset.amount && !customAmount
-                          ? 'bg-gradient-to-b from-navy-card to-brand-bg border-gold-base shadow-[0_0_15px_rgba(223,183,108,0.2)] scale-105'
-                          : 'bg-brand-bg/60 border-slate-800/80 hover:border-gold-base/40 hover:bg-brand-bg'
-                      }`}
-                    >
-                      <span className="text-gold-light font-bold mb-2 text-center text-sm md:text-base h-10 flex items-center">{preset.title}</span>
-                      <span className={`text-3xl md:text-4xl font-black ${amount === preset.amount && !customAmount ? 'text-gold-light' : 'text-slate-200'}`}>
-                        ₪{preset.amount}
-                      </span>
-                      <span className="text-slate-500 text-sm mt-1">{preset.subtitle}</span>
-                    </button>
-                  ))}
-                </div>
+        {/* גריד כפתורי הסכומים המשודרג */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {presetAmounts.map((preset) => {
+            const isSelected = amount === preset.amount && !customAmount;
+            return (
+              <button
+                key={preset.amount}
+                type="button"
+                onClick={() => {
+                  setAmount(preset.amount);
+                  setCustomAmount('');
+                }}
+                className={`flex flex-col items-center justify-center py-6 px-4 rounded-2xl border-2 transition-all duration-300 ${
+                  isSelected
+                    ? 'bg-gradient-to-b from-navy-card to-brand-bg border-gold-base shadow-[0_0_15px_rgba(223,183,108,0.2)] scale-105'
+                    : 'bg-brand-bg/60 border-slate-800/80 hover:border-gold-base/40 hover:bg-brand-bg'
+                }`}
+              >
+                {/* כותרת המסלול */}
+                <span className="text-gold-light font-bold mb-2 text-center text-sm md:text-base h-10 flex items-center">
+                  {preset.title}
+                </span>
 
-                <div className="max-w-xl mx-auto relative mt-6">
-                  <input
-                    type="number"
-                    placeholder="או הזינו סכום נדבת לבכם..."
-                    value={customAmount}
-                    onChange={(e) => {
-                      setCustomAmount(e.target.value);
-                      setAmount(null);
-                    }}
-                    className="w-full bg-brand-bg text-gold-base text-center font-bold text-xl placeholder-slate-600 px-6 py-5 rounded-2xl border border-slate-800 focus:border-gold-base/50 outline-none transition"
-                  />
-                </div>
+                {/* הסכום הגדול */}
+                <span className={`text-3xl md:text-4xl font-black ${isSelected ? 'text-gold-light' : 'text-slate-200'}`}>
+                  ₪{preset.amount}
+                </span>
 
-                <div className="text-center mt-10">
-                  <button
-                    type="button"
-                    onClick={handleNextStep}
-                    className="bg-gradient-to-r from-gold-light to-gold-dark hover:from-gold-light hover:to-gold-base text-[#060a13] py-4 px-12 rounded-xl font-black text-xl shadow-xl transition-all cursor-pointer inline-flex items-center gap-3"
-                  >
-                    המשך לפרטים והקדשה <ArrowRight className="w-6 h-6 rotate-180" />
-                  </button>
-                </div>
-              </div>
-            ) : (
+                {/* הכיתוב "לחודש" המודגש */}
+                <span className={`text-xs font-bold tracking-wide mt-1.5 px-2.5 py-0.5 rounded-md transition-colors ${
+                  isSelected 
+                    ? 'bg-gold-base/20 text-gold-light border border-gold-base/30' 
+                    : 'bg-slate-800/50 text-slate-400 border border-transparent'
+                }`}>
+                  {preset.subtitle}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* שדה סכום חופשי משודרג עם תגית "לחודש" דינמית */}
+        <div className="max-w-xl mx-auto relative mt-6">
+          <input
+            type="number"
+            placeholder="או הזינו סכום נדבת לבכם..."
+            value={customAmount}
+            onChange={(e) => {
+              setCustomAmount(e.target.value);
+              setAmount(null);
+            }}
+            className="w-full bg-brand-bg text-gold-base text-center font-bold text-xl placeholder-slate-600 px-14 py-5 rounded-2xl border border-slate-800 focus:border-gold-base/50 outline-none transition"
+          />
+          {/* תגית "לחודש" שמופיעה בתוך האינפוט ברגע שמתחילים להקליד סכום */}
+          {customAmount && (
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 bg-gold-base/10 border border-gold-base/20 text-gold-light text-xs font-bold px-2.5 py-1 rounded-md animate-fade-in">
+              לחודש
+            </div>
+          )}
+        </div>
+
+        <div className="text-center mt-10">
+          <button
+            type="button"
+            onClick={handleNextStep}
+            className="bg-gradient-to-r from-gold-light to-gold-dark hover:from-gold-light hover:to-gold-base text-[#060a13] py-4 px-12 rounded-xl font-black text-xl shadow-xl transition-all cursor-pointer inline-flex items-center gap-3"
+          >
+            המשך לפרטים והקדשה <ArrowRight className="w-6 h-6 rotate-180" />
+          </button>
+        </div>
+      </div>
+    ) : (
               <form onSubmit={handlePaymentSubmit} className="space-y-6 max-w-2xl mx-auto animate-fade-in">
                 <button 
                   type="button" 
@@ -343,35 +445,38 @@ export default function DonationLandingPage() {
         </div>
 
         {/* לוח כל השותפים - מציג את כולם מיידית ללא פילטור */}
-        <div className="max-w-5xl mx-auto px-4 pb-16">
-          <div className="bg-navy-card/60 backdrop-blur-sm rounded-3xl shadow-xl border border-slate-800/50 p-6 md:p-10">
-            <div className="flex items-center justify-between mb-8 border-b border-slate-800/80 pb-4">
-              <div className="flex items-center gap-3">
-                <Trophy className="w-6 h-6 text-gold-base" />
-                <h2 className="text-xl md:text-2xl font-bold text-slate-200">לוח השותפים: מחזיקי הכולל</h2>
-              </div>
-              {/* <span className="text-sm text-gold-base font-medium bg-gold-base/10 px-3 py-1 rounded-full border border-gold-base/20">מתעדכן בלייב</span> */}
-            </div>
+<div className="max-w-5xl mx-auto px-4 pb-16">
+  <div className="bg-navy-card/60 backdrop-blur-sm rounded-3xl shadow-xl border border-slate-800/50 p-6 md:p-10">
+    <div className="flex items-center justify-between mb-8 border-b border-slate-800/80 pb-4">
+      <div className="flex items-center gap-3">
+        <Trophy className="w-6 h-6 text-gold-base" />
+        <h2 className="text-xl md:text-2xl font-bold text-slate-200">לוח השותפים: מחזיקי הכולל</h2>
+      </div>
+    </div>
+    
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {donors.map((donor) => (
+        <div key={donor._id} className="bg-brand-bg/80 border border-slate-800 hover:border-gold-base/30 transition-colors rounded-xl p-4 flex flex-col justify-center">
+          <div className="flex justify-between items-start mb-2 animate-fade-in">
+            <span className="font-bold text-slate-200 truncate pr-1 align-middle self-center">{donor.name}</span>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {donors.map((donor) => (
-                <div key={donor._id} className="bg-brand-bg/80 border border-slate-800 hover:border-gold-base/30 transition-colors rounded-xl p-4 flex flex-col justify-center">
-                  <div className="flex justify-between items-start mb-2 animate-fade-in">
-                    <span className="font-bold text-slate-200 truncate pr-1">{donor.name}</span>
-                    <span className="font-black text-gold-light bg-gold-base/10 border border-gold-base/20 px-3 py-1 rounded-lg text-sm shrink-0">
-                      ₪{donor.amount}
-                    </span>
-                  </div>
-                  {donor.dedication && (
-                    <div className="text-xs text-gold-base/70 pr-1 truncate">
-                      {donor.dedication}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            {/* קופסית הסכום עם תוספת "לחודש" מעוצבת באותיות קטנות יותר */}
+            <span className="font-black text-gold-light bg-gold-base/10 border border-gold-base/20 px-3 py-1 rounded-lg text-sm shrink-0 flex items-center gap-1">
+              <span>₪{donor.amount}</span>
+              <span className="text-[10px] opacity-80 font-normal">לחודש</span>
+            </span>
           </div>
+          
+          {donor.dedication && (
+            <div className="text-xs text-gold-base/70 pr-1 truncate mt-1">
+              {donor.dedication}
+            </div>
+          )}
         </div>
+      ))}
+    </div>
+  </div>
+</div>
       </main>
 
       <NedarimFrame 

@@ -18,6 +18,14 @@
   --color-gold-light: var(--color-gold-light);
   --color-gold-base: var(--color-gold-base);
   --color-gold-dark: var(--color-gold-dark);
+
+  /* הגדרת האנימציה של הרצועה הרצה עבור Tailwind v4 */
+  --animate-marquee: marquee 120s linear infinite;
+
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(100%); } /* כיוון ימינה המתאים לשפה העברית RTL */
+  }
 }
 
 /* הגדרות בסיסיות לכל האתר */
@@ -46,3 +54,4 @@ input[type="number"]:focus {
   border-color: var(--color-gold-base);
   box-shadow: 0 0 0 2px rgba(223, 183, 108, 0.2);
 }
+
